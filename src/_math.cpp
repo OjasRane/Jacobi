@@ -35,8 +35,12 @@ double jacobi::exp(const double x) {
     const long long integer_part = floor(x);
     const double frac_part = x - floor(x);
     double exp_int{1.0};
-    for (std::size_t i = 0; i < integer_part; ++i) {
+    bool isSigned{x < 0};
+    for (std::uint64_t i = 0; i < integer_part; ++i) {
         exp_int *= e;
+    }
+    if (isSigned) {
+        exp_int = 1 / exp_int;
     }
     double prev = e;
     double term{1.0};
