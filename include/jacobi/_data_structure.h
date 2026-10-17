@@ -131,9 +131,21 @@ namespace jacobi {
     template <typename T>
     Matrix<T> zeros(std::uint64_t, std::uint64_t);
     template <typename T>
+    Matrix<T> zeros_like(const Matrix<T>& i_M) { return zeros<T>(i_M.rows(), i_M.cols()); }
+    template <typename T>
+    Matrix<T> zeros_like(const Vector<T>&);
+
+    template <typename T>
     Matrix<T> ones(std::uint64_t, std::uint64_t);
     template <typename T>
+    Matrix<T> ones_like(const Matrix<T>& i_M) { return ones<T>(i_M.rows(), i_M.cols()); }
+    template <typename T>
+    Matrix<T> ones_like(const Vector<T>&);
+
+    template <typename T>
     Matrix<T> eyes(std::uint64_t);
+    template <typename T>
+    Matrix<T> eyes_like(const Matrix<T>&);
 
     template <typename T>
     Vector<T> load_vector(const std::string&);
@@ -643,6 +655,15 @@ jacobi::Matrix<T> jacobi::zeros(std::uint64_t rows, std::uint64_t cols) {
     return r_M;
 }
 
+template<typename T>
+jacobi::Matrix<T> jacobi::zeros_like(const Vector<T>& i_V) {
+    Matrix<T> r_M(i_V.size(), 1);
+    for (std::uint64_t i = 0; i < i_V.size(); ++i) {
+        r_M[i] = T{};
+    }
+    return r_M;
+}
+
 template <typename T>
 jacobi::Matrix<T> jacobi::ones(std::uint64_t rows, std::uint64_t cols) {
     Matrix<T> r_M(rows, cols);
@@ -650,6 +671,15 @@ jacobi::Matrix<T> jacobi::ones(std::uint64_t rows, std::uint64_t cols) {
         for (std::uint64_t j = 0; j < cols; ++j) {
             r_M(i, j) = 1;
         }
+    }
+    return r_M;
+}
+
+template <typename T>
+jacobi::Matrix<T> jacobi::ones_like(const Vector<T>& i_V) {
+    Matrix<T> r_M(i_V.size(), 1);
+    for (std::uint64_t i = 0; i < i_V.size(); ++i) {
+        r_M[i] = 1;
     }
     return r_M;
 }
@@ -663,6 +693,14 @@ jacobi::Matrix<T> jacobi::eyes(std::uint64_t order) {
         }
     }
     return r_M;
+}
+
+template<typename T>
+jacobi::Matrix<T> jacobi::eyes_like(const Matrix<T>& i_M) {
+    if (i_M.rows() != i_M.cols()) {
+        throw std::runtime_error("Matrix must be square");
+    }
+    return jacobi::eyes<T>(i_M.rows());
 }
 
 template<typename T>
