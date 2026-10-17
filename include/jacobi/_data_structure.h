@@ -729,9 +729,6 @@ jacobi::Vector<T> jacobi::load_vector(const std::string& path) {
             Vector<T> r_V(length);
 
             file.read(reinterpret_cast<char*>(&r_V[0]), sizeof(T) * length);
-            // for (std::uint64_t i = 0; i < length; ++i) {
-            //     file.read(reinterpret_cast<char*>(&r_V[i]), sizeof(T));
-            // }
             return r_V;
         }
         if (type == 'M') {
@@ -742,9 +739,6 @@ jacobi::Vector<T> jacobi::load_vector(const std::string& path) {
             Vector<T> r_V(rows * cols);
 
             file.read(reinterpret_cast<char*>(&r_V[0]), sizeof(T) * rows * cols);
-            // for (std::uint64_t i = 0; i < rows * cols; ++i) {
-            //     file.read(reinterpret_cast<char*>(&r_V[i]), sizeof(T));
-            // }
             return r_V;
         }
         throw std::runtime_error("Invalid file");
@@ -778,9 +772,8 @@ jacobi::Matrix<T> jacobi::load_matrix(const std::string& path) {
             std::uint64_t cols{};
             file.read(reinterpret_cast<char*>(&cols), sizeof(cols));
             Matrix<T> r_M(rows, cols);
-            for (std::uint64_t i = 0; i < rows * cols; ++i) {
-                file.read(reinterpret_cast<char*>(&r_M[i]), sizeof(T));
-            }
+
+            file.read(reinterpret_cast<char*>(&r_M[0]), sizeof(T) * rows * cols);
             return r_M;
         }
         if (type == 'V') {
@@ -788,9 +781,8 @@ jacobi::Matrix<T> jacobi::load_matrix(const std::string& path) {
             file.read(reinterpret_cast<char*>(&rows), sizeof(rows));
             std::uint64_t cols{1};
             Matrix<T> r_M(rows, cols);
-            for (std::uint64_t i = 0; i < rows; ++i) {
-                file.read(reinterpret_cast<char*>(&r_M[i]), sizeof(T));
-            }
+
+            file.read(reinterpret_cast<char*>(&r_M[0]), sizeof(T) * rows);
             return r_M;
         }
         throw std::runtime_error("Invalid file");
