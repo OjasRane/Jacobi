@@ -37,8 +37,10 @@ namespace jacobi {
         T inner_product(const Vector&) const;
         T operator*(const Vector& i_V) const { return inner_product(i_V); }
         Vector operator*(const Matrix<T>& i_M) const;
-
         Vector operator*(const T&) const;
+
+        Vector operator/(const T&) const;
+        Vector operator/(const Vector&) const;
 
         Vector hadamard_product(const Vector&) const;
 
@@ -59,6 +61,9 @@ namespace jacobi {
 
     template <typename T>
     Vector<T> operator*(const T& scaler, const Vector<T>& i_V) { return i_V * scaler; }
+
+    template <typename T>
+    Vector<T> operator/(const T&, const Vector<T>&);
 
     template <typename T>
     Vector<T> zeros(std::uint64_t);
@@ -93,6 +98,9 @@ namespace jacobi {
         Matrix operator*(const T&) const;
         Vector<T> operator*(const Vector<T>&) const;
 
+        Matrix operator/(const T&) const;
+        Matrix operator/(const Matrix&) const;
+
         Matrix hadamard_product(const Matrix&) const;
 
         Matrix transpose() const;
@@ -116,6 +124,9 @@ namespace jacobi {
 
     template <typename T>
     Matrix<T> operator*(const T& scaler, const Matrix<T>& i_M) { return i_M * scaler; }
+
+    template <typename T>
+    Matrix<T> operator/(const T&, const Matrix<T>&);
 
     template <typename T>
     Matrix<T> zeros(std::uint64_t, std::uint64_t);
@@ -267,6 +278,27 @@ jacobi::Vector<T> jacobi::Vector<T>::operator*(const T& scaler) const {
     return r_V;
 }
 
+template <typename T>
+jacobi::Vector<T> jacobi::Vector<T>::operator/(const T& scaler) const {
+    Vector r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V.m_Data[i] = m_Data[i] / scaler;
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Vector<T> jacobi::Vector<T>::operator/(const Vector& i_V) const {
+    if (m_Length != i_V.m_Length) {
+        throw std::length_error("Length of both vectors must be equal");
+    }
+    Vector r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V.m_Data[i] = m_Data[i] / i_V.m_Data[i];
+    }
+    return r_V;
+}
+
 template<typename T>
 jacobi::Vector<T> jacobi::Vector<T>::hadamard_product(const Vector& i_V) const {
     if (m_Length != i_V.m_Length) {
@@ -322,6 +354,15 @@ template <typename T>
 jacobi::Vector<T>::~Vector() {
     delete[] m_Data;
     m_Data = nullptr;
+}
+
+template<typename T>
+jacobi::Vector<T> jacobi::operator/(const T& scaler, const Vector<T>& i_V) {
+    Vector<T> r_V(i_V.size());
+    for (std::uint64_t i = 0; i < i_V.size(); ++i) {
+        r_V[i] = scaler / i_V[i];
+    }
+    return r_V;
 }
 
 template <typename T>
@@ -493,6 +534,27 @@ jacobi::Vector<T> jacobi::Matrix<T>::operator*(const Vector<T>& i_V) const {
 }
 
 template <typename T>
+jacobi::Matrix<T> jacobi::Matrix<T>::operator/(const T& scaler) const {
+    Matrix r_M(m_Rows, m_Cols);
+    for (std::uint64_t i = 0; i < m_Rows * m_Cols; ++i) {
+        r_M.m_Data[i] = m_Data[i] / scaler;
+    }
+    return r_M;
+}
+
+template <typename T>
+jacobi::Matrix<T> jacobi::Matrix<T>::operator/(const Matrix& i_M) const {
+    if (m_Cols != i_M.m_Cols || m_Rows != i_M.m_Rows) {
+        throw std::length_error("Shape of both matrix must be equal");
+    }
+    Matrix r_M(m_Rows, i_M.m_Cols);
+    for (std::uint64_t i = 0; i < m_Rows * m_Cols; ++i) {
+        r_M.m_Data[i] = m_Data[i] / i_M.m_Data[i];
+    }
+    return r_M;
+}
+
+template <typename T>
 jacobi::Matrix<T> jacobi::Matrix<T>::hadamard_product(const Matrix& i_M) const {
     if (m_Rows != i_M.rows() || m_Cols != i_M.cols()) {
         throw std::domain_error("Attempt to multiply non-compatible matrices");
@@ -559,6 +621,15 @@ template <typename T>
 jacobi::Matrix<T>::~Matrix() {
     delete[] m_Data;
     m_Data = nullptr;
+}
+
+template <typename T>
+jacobi::Matrix<T> jacobi::operator/(const T& scaler, const Matrix<T>& i_M) {
+    Matrix<T> r_M(i_M.rows(), i_M.cols());
+    for (std::uint64_t i = 0; i < i_M.size(); ++i) {
+        r_M[i] = scaler / i_M[i];
+    }
+    return r_M;
 }
 
 template <typename T>
