@@ -7,11 +7,14 @@
 #include <fstream>
 #include <cstdint>
 #include <cstring>
+#include <type_traits>
 #include "_constants.h"
 
 namespace jacobi {
     template <typename T>
     class Matrix;
+    template <typename T>
+    class Row;
 
     template <typename T>
     class Vector {
@@ -22,6 +25,7 @@ namespace jacobi {
         Vector(std::uint64_t);
         Vector(const Vector&);
         Vector(std::initializer_list<T>);
+        Vector(const Row<T>&);
         Vector& operator=(const Vector&);
 
         T& operator[](std::uint64_t);
@@ -29,10 +33,14 @@ namespace jacobi {
 
         Vector operator+(const Vector&) const;
         Vector operator+(const T&) const;
+        Vector operator+(const Row<T>&) const;
+        Vector operator+(const Row<const T>&) const;
 
         Vector operator-(const Vector&) const;
         Vector operator-() const;
         Vector operator-(const T&) const;
+        Vector operator-(const Row<T>&) const;
+        Vector operator-(const Row<const T>&) const;
 
         T inner_product(const Vector&) const;
         T operator*(const Vector& i_V) const { return inner_product(i_V); }
@@ -52,6 +60,9 @@ namespace jacobi {
 
         ~Vector();
     };
+
+    template <typename T>
+    std::ostream& operator<<(std::ostream&, const Vector<T>&);
 
     template <typename T>
     Vector<T> operator+(const T& scaler, const Vector<T>& i_V) { return i_V + scaler; }
@@ -80,6 +91,7 @@ namespace jacobi {
         Matrix(const Matrix&);
         Matrix(std::initializer_list<std::initializer_list<T>>);
         Matrix(const Vector<T>&);
+        Matrix(const Row<T>&);
         Matrix& operator=(const Matrix&);
 
         T& operator()(const std::uint64_t row, const std::uint64_t col) { return m_Data[col + row * m_Cols]; }
@@ -113,8 +125,14 @@ namespace jacobi {
 
         void save(const std::string&, const std::uint8_t = 1) const;
 
+        Row<T> row(const std::uint64_t);
+        Row<const T> row(const std::uint64_t) const;
+
         ~Matrix();
     };
+
+    template <typename T>
+    std::ostream& operator<<(std::ostream&, const Matrix<T>&);
 
     template <typename T>
     Matrix<T> operator+(const T& scaler, const Matrix<T>& i_M) { return i_M + scaler; }
@@ -151,6 +169,56 @@ namespace jacobi {
     Vector<T> load_vector(const std::string&);
     template <typename T>
     Matrix<T> load_matrix(const std::string&);
+
+    template <typename T>
+    class Row {
+    private:
+        std::uint64_t m_Length;
+        T* m_Data;
+        Row(const std::uint64_t length, T* const data) : m_Length(length), m_Data(data) {}
+
+        friend class Matrix<std::remove_const_t<T>>;
+    public:
+        Row& operator=(const Vector<T>&);
+        Row& operator=(const Row&);
+
+        Row& operator+=(const Vector<T>&);
+        Row& operator+=(const Row&);
+        Row& operator+=(const T&);
+        Vector<std::remove_const_t<T>> operator+(const Row&) const;
+        Vector<std::remove_const_t<T>> operator+(const T&) const;
+        Vector<std::remove_const_t<T>> operator+(const Vector<std::remove_const_t<T>>&) const;
+
+        Row& operator-=(const Vector<T>&);
+        Row& operator-=(const Row&);
+        Row& operator-=(const T&);
+        Vector<std::remove_const_t<T>> operator-(const Row&) const;
+        Vector<std::remove_const_t<T>> operator-(const T&) const;
+        Vector<std::remove_const_t<T>> operator-() const;
+        Vector<std::remove_const_t<T>> operator-(const Vector<std::remove_const_t<T>>&) const;
+
+        Row& operator*=(const T&);
+        Vector<std::remove_const_t<T>> operator*(const T&) const;
+
+        Row& operator/=(const T&);
+        Vector<std::remove_const_t<T>> operator/(const T&) const;
+
+        T& operator[](std::uint64_t) const;
+
+        std::uint64_t size() const { return m_Length; }
+    };
+
+    template <typename T>
+    std::ostream& operator<<(std::ostream&, const Row<T>&);
+
+    template <typename T>
+    Vector<std::remove_const_t<T>> operator+(const std::remove_const_t<T>&, const Row<T>&);
+
+    template <typename T>
+    Vector<std::remove_const_t<T>> operator-(const std::remove_const_t<T>&, const Row<T>&);
+
+    template <typename T>
+    Vector<std::remove_const_t<T>> operator*(const std::remove_const_t<T>&, const Row<T>&);
 }
 
 template <typename T>
@@ -175,6 +243,15 @@ jacobi::Vector<T>::Vector(const std::initializer_list<T> values)
     std::uint64_t i = 0;
     for (const T& value : values) {
         m_Data[i++] = value;
+    }
+}
+
+template <typename T>
+jacobi::Vector<T>::Vector(const Row<T>& i_R)
+    : m_Length(i_R.size()) {
+    m_Data = new T[m_Length];
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        m_Data[i] = i_R[i];
     }
 }
 
@@ -225,6 +302,30 @@ jacobi::Vector<T> jacobi::Vector<T>::operator+(const T& scaler) const {
 }
 
 template <typename T>
+jacobi::Vector<T> jacobi::Vector<T>::operator+(const Row<T>& i_R) const {
+    if (m_Length != i_R.size()) {
+        throw std::runtime_error("Length mismatch");
+    }
+    Vector r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V.m_Data[i] = m_Data[i] + i_R[i];
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Vector<T> jacobi::Vector<T>::operator+(const Row<const T>& i_R) const {
+    if (m_Length != i_R.size()) {
+        throw std::runtime_error("Length mismatch");
+    }
+    Vector r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V.m_Data[i] = m_Data[i] + i_R[i];
+    }
+    return r_V;
+}
+
+template <typename T>
 jacobi::Vector<T> jacobi::Vector<T>::operator-(const Vector& i_V) const {
     if (m_Length != i_V.m_Length) {
         throw std::length_error("Length of both vectors must be equal");
@@ -250,6 +351,30 @@ jacobi::Vector<T> jacobi::Vector<T>::operator-(const T& scaler) const {
     Vector r_V(m_Length);
     for (std::uint64_t i = 0; i < m_Length; ++i) {
         r_V.m_Data[i] = m_Data[i] - scaler;
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Vector<T> jacobi::Vector<T>::operator-(const Row<T>& i_R) const {
+    if (m_Length != i_R.size()) {
+        throw std::runtime_error("Length mismatch");
+    }
+    Vector r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V.m_Data[i] = m_Data[i] - i_R[i];
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Vector<T> jacobi::Vector<T>::operator-(const Row<const T>& i_R) const {
+    if (m_Length != i_R.size()) {
+        throw std::runtime_error("Length mismatch");
+    }
+    Vector r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V.m_Data[i] = m_Data[i] - i_R[i];
     }
     return r_V;
 }
@@ -324,17 +449,6 @@ jacobi::Vector<T> jacobi::Vector<T>::hadamard_product(const Vector& i_V) const {
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const jacobi::Vector<T>& i_V) {
-    constexpr int n{10};
-    os << '[' << i_V[0];
-    for (std::uint64_t i = 1; i < i_V.size(); ++i) {
-        os << std::setw(n) << i_V[i];
-    }
-    os << "]\n";
-    return os;
-}
-
-template <typename T>
 jacobi::Matrix<T> jacobi::Vector<T>::outer_product(const Vector& i_V) const {
     Matrix<T> r_M(m_Length, i_V.size());
     for (std::uint64_t i = 0; i < m_Length; ++i) {
@@ -366,6 +480,17 @@ template <typename T>
 jacobi::Vector<T>::~Vector() {
     delete[] m_Data;
     m_Data = nullptr;
+}
+
+template <typename T>
+std::ostream& jacobi::operator<<(std::ostream& os, const Vector<T>& i_V) {
+    constexpr int n{10};
+    os << '[' << i_V[0];
+    for (std::uint64_t i = 1; i < i_V.size(); ++i) {
+        os << std::setw(n) << i_V[i];
+    }
+    os << ']';
+    return os;
 }
 
 template<typename T>
@@ -431,6 +556,15 @@ jacobi::Matrix<T>::Matrix(const Vector<T>& i_V)
     m_Data = new T[m_Rows * m_Cols];
     for (std::uint64_t i = 0; i < m_Rows * m_Cols; ++i) {
         m_Data[i] = i_V[i];
+    }
+}
+
+template <typename T>
+jacobi::Matrix<T>::Matrix(const Row<T>& i_R)
+    : m_Rows(1), m_Cols(i_R.size()) {
+    m_Data = new T[m_Rows * m_Cols];
+    for (std::uint64_t i = 0; i < m_Rows * m_Cols; ++i) {
+        m_Data[i] = i_R[i];
     }
 }
 
@@ -616,8 +750,32 @@ void jacobi::Matrix<T>::save(const std::string& path, const std::uint8_t version
     file.close();
 }
 
+template<typename T>
+jacobi::Row<T> jacobi::Matrix<T>::row(const std::uint64_t i_Row) {
+    if (i_Row >= m_Rows) {
+        throw std::out_of_range("Row index out of range");
+    }
+    Row<T> r_R(m_Cols, &m_Data[i_Row * m_Cols]);
+    return r_R;
+}
+
+template<typename T>
+jacobi::Row<const T> jacobi::Matrix<T>::row(const std::uint64_t i_Row) const {
+    if (i_Row >= m_Rows) {
+        throw std::out_of_range("Row index out of range");
+    }
+    Row<const T> r_R(m_Cols, &m_Data[i_Row * m_Cols]);
+    return r_R;
+}
+
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const jacobi::Matrix<T>& i_M) {
+jacobi::Matrix<T>::~Matrix() {
+    delete[] m_Data;
+    m_Data = nullptr;
+}
+
+template <typename T>
+std::ostream& jacobi::operator<<(std::ostream& os, const Matrix<T>& i_M) {
     constexpr int n{10};
     for (std::uint64_t i = 0; i < i_M.rows(); ++i) {
         os << '[' << i_M(i, 0);
@@ -627,12 +785,6 @@ std::ostream& operator<<(std::ostream& os, const jacobi::Matrix<T>& i_M) {
         os << "]\n";
     }
     return os;
-}
-
-template <typename T>
-jacobi::Matrix<T>::~Matrix() {
-    delete[] m_Data;
-    m_Data = nullptr;
 }
 
 template <typename T>
@@ -788,4 +940,240 @@ jacobi::Matrix<T> jacobi::load_matrix(const std::string& path) {
         throw std::runtime_error("Invalid file");
     }
     throw std::runtime_error("Version mismatch");
+}
+
+template<typename T>
+jacobi::Row<T>& jacobi::Row<T>::operator=(const Vector<T>& i_V) {
+    if (m_Length != i_V.size()) {
+        throw std::runtime_error("Length mismatch");
+    }
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        m_Data[i] = i_V[i];
+    }
+    return *this;
+}
+
+template<typename T>
+jacobi::Row<T>& jacobi::Row<T>::operator=(const Row& i_R) {
+    if (m_Length != i_R.m_Length) {
+        throw std::runtime_error("Length mismatch");
+    }
+    if (this != &i_R) {
+        for (std::uint64_t i = 0; i < m_Length; ++i) {
+            m_Data[i] = i_R.m_Data[i];
+        }
+    }
+    return *this;
+}
+
+template <typename T>
+jacobi::Row<T>& jacobi::Row<T>::operator+=(const Vector<T>& i_V) {
+    if (m_Length != i_V.size()) {
+        throw std::runtime_error("Length mismatch");
+    }
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        m_Data[i] += i_V[i];
+    }
+    return *this;
+}
+
+template <typename T>
+jacobi::Row<T>& jacobi::Row<T>::operator+=(const Row& i_R) {
+    if (m_Length != i_R.m_Length) {
+        throw std::runtime_error("Length mismatch");
+    }
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        m_Data[i] += i_R.m_Data[i];
+    }
+    return *this;
+}
+
+template<typename T>
+jacobi::Row<T> &jacobi::Row<T>::operator+=(const T& scaler) {
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        m_Data[i] += scaler;
+    }
+    return *this;
+}
+
+template <typename T>
+jacobi::Vector<std::remove_const_t<T>> jacobi::Row<T>::operator+(const Row& i_R) const {
+    if (m_Length != i_R.m_Length) {
+        throw std::runtime_error("Length mismatch");
+    }
+    Vector<std::remove_const_t<T>> r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V[i] = m_Data[i] + i_R.m_Data[i];
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Vector<std::remove_const_t<T>> jacobi::Row<T>::operator+(const T& scaler) const {
+    Vector<std::remove_const_t<T>> r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V[i] = m_Data[i] + scaler;
+    }
+    return r_V;
+}
+
+template<typename T>
+jacobi::Vector<std::remove_const_t<T>> jacobi::Row<T>::operator+(const Vector<std::remove_const_t<T>>& i_V) const {
+    if (m_Length != i_V.size()) {
+        throw std::runtime_error("Length mismatch");
+    }
+    Vector<std::remove_const_t<T>> r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V[i] = m_Data[i] + i_V[i];
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Row<T>& jacobi::Row<T>::operator-=(const Vector<T>& i_V) {
+    if (m_Length != i_V.size()) {
+        throw std::runtime_error("Length mismatch");
+    }
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        m_Data[i] -= i_V[i];
+    }
+    return *this;
+}
+
+template <typename T>
+jacobi::Row<T>& jacobi::Row<T>::operator-=(const Row& i_R) {
+    if (m_Length != i_R.m_Length) {
+        throw std::runtime_error("Length mismatch");
+    }
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        m_Data -= i_R.m_Data[i];
+    }
+    return *this;
+}
+
+template<typename T>
+jacobi::Row<T> &jacobi::Row<T>::operator-=(const T& scaler) {
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        m_Data[i] -= scaler;
+    }
+    return *this;
+}
+
+template<typename T>
+jacobi::Vector<std::remove_const_t<T>> jacobi::Row<T>::operator-(const Row& i_R) const {
+    if (m_Length != i_R.m_Length) {
+        throw std::runtime_error("Length mismatch");
+    }
+    Vector<std::remove_const_t<T>> r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V[i] = m_Data[i] - i_R.m_Data[i];
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Vector<std::remove_const_t<T>> jacobi::Row<T>::operator-(const T& scaler) const {
+    Vector<std::remove_const_t<T>> r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V[i] = m_Data[i] - scaler;
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Vector<std::remove_const_t<T>> jacobi::Row<T>::operator-() const {
+    Vector<std::remove_const_t<T>> r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V[i] = -m_Data[i];
+    }
+    return r_V;
+}
+
+template<typename T>
+jacobi::Vector<std::remove_const_t<T> > jacobi::Row<T>::operator-(const Vector<std::remove_const_t<T>>& i_V) const {
+    if (m_Length != i_V.size()) {
+        throw std::runtime_error("Length mismatch");
+    }
+    Vector<std::remove_const_t<T>> r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V[i] = m_Data[i] - i_V[i];
+    }
+    return r_V;
+}
+
+template<typename T>
+jacobi::Row<T>& jacobi::Row<T>::operator*=(const T& scaler) {
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        m_Data[i] *= scaler;
+    }
+    return *this;
+}
+
+template <typename T>
+jacobi::Vector<std::remove_const_t<T>> jacobi::Row<T>::operator*(const T& scaler) const {
+    Vector<std::remove_const_t<T>> r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V[i] = m_Data[i] * scaler;
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Row<T>& jacobi::Row<T>::operator/=(const T& scaler) {
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        m_Data[i] /= scaler;
+    }
+    return *this;
+}
+
+template <typename T>
+jacobi::Vector<std::remove_const_t<T>> jacobi::Row<T>::operator/(const T& scaler) const {
+    Vector<std::remove_const_t<T>> r_V(m_Length);
+    for (std::uint64_t i = 0; i < m_Length; ++i) {
+        r_V[i] = m_Data[i] / scaler;
+    }
+    return r_V;
+}
+
+template <typename T>
+T& jacobi::Row<T>::operator[](std::uint64_t i) const {
+    return m_Data[i];
+}
+
+template <typename T>
+std::ostream& jacobi::operator<<(std::ostream& os, const Row<T>& i_R) {
+    constexpr int n{10};
+    os << '[' << i_R[0];
+    for (std::uint64_t i = 1; i < i_R.size(); ++i) {
+        os << std::setw(n) << i_R[i];
+    }
+    os << ']';
+    return os;
+}
+
+template <typename T>
+jacobi::Vector<std::remove_const_t<T>> jacobi::operator+(const std::remove_const_t<T>& scaler, const Row<T>& i_R) {
+    Vector<std::remove_const_t<T>> r_V(i_R.size());
+    for (std::uint64_t i = 0; i < i_R.size(); ++i) {
+        r_V[i] = i_R[i] + scaler;
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Vector<std::remove_const_t<T>> jacobi::operator-(const std::remove_const_t<T>& scaler, const Row<T>& i_R) {
+    Vector<std::remove_const_t<T>> r_V(i_R.size());
+    for (std::uint64_t i = 0; i < i_R.size(); ++i) {
+        r_V[i] = scaler - i_R[i];
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Vector<std::remove_const_t<T>> jacobi::operator*(const std::remove_const_t<T>& scaler, const Row<T>& i_R) {
+    Vector<std::remove_const_t<T>> r_V(i_R.size());
+    for (std::uint64_t i = 0; i < i_R.size(); ++i) {
+        r_V[i] = i_R[i] * scaler;
+    }
+    return r_V;
 }
