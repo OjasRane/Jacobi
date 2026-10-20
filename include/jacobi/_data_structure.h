@@ -9,6 +9,7 @@
 #include <cstring>
 #include <type_traits>
 #include "_constants.h"
+#include "_math.h"
 
 namespace jacobi {
     template <typename T>
@@ -219,6 +220,12 @@ namespace jacobi {
 
     template <typename T>
     Vector<std::remove_const_t<T>> operator*(const std::remove_const_t<T>&, const Row<T>&);
+
+    template <typename T>
+    Vector<T> linspace(const T&, const T&, const std::uint64_t&);
+
+    template <typename T>
+    Vector<T> arange(const T&, const T&, const T&);
 }
 
 template <typename T>
@@ -1174,6 +1181,36 @@ jacobi::Vector<std::remove_const_t<T>> jacobi::operator*(const std::remove_const
     Vector<std::remove_const_t<T>> r_V(i_R.size());
     for (std::uint64_t i = 0; i < i_R.size(); ++i) {
         r_V[i] = i_R[i] * scaler;
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Vector<T> jacobi::linspace(const T& start, const T& end, const std::uint64_t& n_points) {
+    if (start > end || n_points <= 1) {
+        throw std::invalid_argument("Unexpected values passed");
+    }
+    const T step = (end - start) / static_cast<T>(n_points - 1);
+    Vector<T> r_V(n_points);
+    r_V[0] = start;
+    r_V[n_points - 1] = end;
+    for (std::uint64_t i = 1; i < n_points-1; ++i) {
+        r_V[i] = start + static_cast<T>(i) * step;
+    }
+    return r_V;
+}
+
+template <typename T>
+jacobi::Vector<T> jacobi::arange(const T& start, const T& end, const T& step) {
+    if (start >= end || step <= 0) {
+        throw std::invalid_argument("Unexpected values passed");
+    }
+    const std::uint64_t n_points = ceil(
+            (static_cast<double>(end) - static_cast<double>(start)) / static_cast<double>(step)
+        );
+    Vector<T> r_V(n_points);
+    for (std::uint64_t i = 0; i < n_points; ++i) {
+        r_V[i] = start + static_cast<T>(i) * step;
     }
     return r_V;
 }
