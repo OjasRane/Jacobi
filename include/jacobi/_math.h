@@ -11,6 +11,7 @@ namespace jacobi {
     double rad2deg(double);
 
     long long floor(double);
+    long long ceil(double);
 
     double exp(double);
 

@@ -24,11 +24,16 @@ double jacobi::rad2deg(const double theta) {
 }
 
 long long jacobi::floor(const double num){
-    long long floor = (long long) num;
-    if (floor < 0 && floor - num > eps) {
-        floor = (long long)(num - 1);
+    long long floor_num = static_cast<long long>(num);
+    if (num < 0 && floor_num !=  num) {
+        --floor_num;
     }
-    return floor;
+    return floor_num;
+}
+
+long long jacobi::ceil(const double num) {
+    const long long floor_num = floor(num);
+    return floor_num != num ? floor_num + 1 : floor_num;
 }
 
 double jacobi::exp(const double x) {
