@@ -9,7 +9,7 @@
 #include <cstring>
 #include <type_traits>
 #include "_constants.h"
-#include "_math.h"
+#include "_fwd.h"
 
 namespace jacobi {
     template <typename T>
@@ -148,7 +148,12 @@ namespace jacobi {
     Matrix<T> operator/(const T&, const Matrix<T>&);
 
     template <typename T>
-    Matrix<T> zeros(std::uint64_t, std::uint64_t);
+    Matrix<T> empty_like(Matrix<T>& i_M) { return Matrix<T>(i_M.rows(), i_M.cols()); }
+    template <typename T>
+    Matrix<T> empty_like(Vector<T>& i_V) { return Vector<T>(i_V.size(), 1); }
+
+    template <typename T>
+    Matrix<T> zeros(const std::uint64_t, const std::uint64_t);
     template <typename T>
     Matrix<T> zeros_like(const Matrix<T>& i_M) { return zeros<T>(i_M.rows(), i_M.cols()); }
     template <typename T>
@@ -804,7 +809,7 @@ jacobi::Matrix<T> jacobi::operator/(const T& scaler, const Matrix<T>& i_M) {
 }
 
 template <typename T>
-jacobi::Matrix<T> jacobi::zeros(std::uint64_t rows, std::uint64_t cols) {
+jacobi::Matrix<T> jacobi::zeros(const std::uint64_t rows, const std::uint64_t cols) {
     Matrix<T> r_M(rows, cols);
     for (std::uint64_t i = 0; i < rows; ++i) {
         for (std::uint64_t j = 0; j < cols; ++j) {
@@ -824,7 +829,7 @@ jacobi::Matrix<T> jacobi::zeros_like(const Vector<T>& i_V) {
 }
 
 template <typename T>
-jacobi::Matrix<T> jacobi::ones(std::uint64_t rows, std::uint64_t cols) {
+jacobi::Matrix<T> jacobi::ones(const std::uint64_t rows, const std::uint64_t cols) {
     Matrix<T> r_M(rows, cols);
     for (std::uint64_t i = 0; i < rows; ++i) {
         for (std::uint64_t j = 0; j < cols; ++j) {
