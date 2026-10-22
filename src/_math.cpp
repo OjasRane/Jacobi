@@ -6,6 +6,9 @@
 #include "jacobi/_constants.h"
 
 double jacobi::sqrt(const double num) {
+    if (num < 0) {
+        throw std::domain_error("Cannot compute square root of a negative number");
+    }
     double prev = num;
     double sqrt = num / 2.0;
     while (abs(prev - sqrt) > eps) {
