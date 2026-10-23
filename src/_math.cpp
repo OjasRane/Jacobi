@@ -43,7 +43,7 @@ double jacobi::exp(const double x) {
     const long long integer_part = floor(x);
     const double frac_part = x - floor(x);
     double exp_int{1.0};
-    bool isSigned{x < 0};
+    const bool isSigned{x < 0};
     for (std::uint64_t i = 0; i < integer_part; ++i) {
         exp_int *= e;
     }
@@ -53,14 +53,12 @@ double jacobi::exp(const double x) {
     double prev = e;
     double term{1.0};
     double exp_frac{term};
-    double p{1.0};
     double i{0.0};
     while (abs(prev - exp_frac) > eps) {
         prev = exp_frac;
         ++i;
         term *= frac_part / i;
         exp_frac += term;
-        p *= frac_part;
     }
     return exp_int * exp_frac;
 }
@@ -72,9 +70,9 @@ double jacobi::ln(const double num) {
     if (num <= 0) {
         throw std::domain_error("Natural Logarithm does not output real values for 0 and negative real numbers");
     }
-    std::uint64_t bits = std::bit_cast<std::uint64_t>(num);
-    std::uint64_t b = ((bits >> 52) & 0x7FFULL) - 1023 + 1;
-    double a = std::bit_cast<double>((bits & 0xFFFFFFFFFFFFFULL) | 0x3FEULL << 52);
+    const std::uint64_t bits = std::bit_cast<std::uint64_t>(num);
+    const std::uint64_t b = ((bits >> 52) & 0x7FFULL) - 1023 + 1;
+    const double a = std::bit_cast<double>((bits & 0xFFFFFFFFFFFFFULL) | 0x3FEULL << 52);
     double lna{0.0};
     double prev{2.0};
     double x = a - 1.0;
