@@ -1,5 +1,6 @@
 #pragma once
 #include <bit>
+#include <ios>
 
 namespace jacobi {
     inline constexpr auto pi = 3.14159265358979323846;
