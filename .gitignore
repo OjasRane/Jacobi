@@ -74,12 +74,10 @@ cmake-build-*/
 # Python-generated files
 __pycache__/
 *.py[oc]
-build/
 dist/
 wheels/
 *.egg-info
 .ipynb_checkpoints/
-.idea/
 
 # Virtual environments
 .venv
