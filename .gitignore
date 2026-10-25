@@ -84,3 +84,6 @@ wheels/
 # Virtual environments
 .venv
 venv/
+
+# Documentation
+docs/
