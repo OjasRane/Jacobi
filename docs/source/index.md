@@ -2,7 +2,7 @@
 
 A numerical computing library built from scratch on C++20
 
-This documentation cover's the libraries setup, usage, data structures, and mathematical functions.
+This documentation covers the libraries setup, usage, data structures, and mathematical functions.
 
 Note that this documentation is under active development.
 
