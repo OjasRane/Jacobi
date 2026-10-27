@@ -12,4 +12,5 @@ linear_algebra
 input_output
 arange
 linspace
+constants
 ```
