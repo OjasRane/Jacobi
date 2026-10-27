@@ -39,7 +39,7 @@ For Linux/MacOS:
 ```
 mkdir build
 cd build
-cmake -G Ninja ..
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
 ninja
 mv libJacobi.a /path/to/your/project
 cd ..
@@ -51,11 +51,13 @@ For Windows:
 ```powershell
 New-Item -ItemType Directory -Path build
 cd build
-cmake -G Ninja ..
-ninja
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+cmake --build .
+
+# Find the compiled binary name from build/ directory and replace it with libJacobi.lib if needed
 Move-Item -Path .\libJacobi.lib -Destination C:\path\to\your\project
 cd ..
-Copy-Item -Path .\include -Destination C:\path\to\your\project -Recurforce -Recurse
+Copy-Item -Path .\include -Destination C:\path\to\your\project -Recurse
 ```
 
 ### Sample code
