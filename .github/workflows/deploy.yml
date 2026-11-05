@@ -1,0 +1,60 @@
+name: Deploy Jacobi Documentation
+
+on:
+  push:
+    branches:
+      - docs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+          cache-dependency-glob: docs/uv.lock
+
+      - name: Install Python
+        working-directory: docs
+        run: uv python install
+
+      - name: Install documentation dependencies
+        working-directory: docs
+        run: uv sync --locked
+
+      - name: Build HTML documentation
+        working-directory: docs
+        run: uv run sphinx-build -b html source build
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs/build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
