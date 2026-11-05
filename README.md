@@ -21,7 +21,7 @@ Jacobi is a work in progress and is not yet intended for production use. For pro
 - `pow()`: Returns $x^y$.
 - `deg2rad()`: Converts degrees to radians.
 - `rad2deg()`: Converts radians to degrees.
-- `norm()`: Returns $\sqrt{\sum{x_i^2}}$ for a vector $\left[ x_1\qquad x_2\qquad\dots\qquad x_n \right]$ or a flattened matrix.
+- `norm()`: Returns $\sqrt{\sum{x_i^2}}$ for a vector $\left\langle x_1\qquad x_2\qquad\dots\qquad x_n \right\rangle$ or a flattened matrix.
 
 For more information, refer to the [documentation site](https://ojasrane.github.io/Jacobi).
 
