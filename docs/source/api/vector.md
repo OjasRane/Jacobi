@@ -6,7 +6,7 @@ Memory for `jacobi::Vector` is managed on heap with rule of 3 implemented.
 
 **Length of vector cannot be changed after creating one!**
 
-Various operators are overloaded for easy of use.
+Various operators are overloaded for ease of use.
 
 ## Creating a `jacobi::Vector`
 
@@ -214,9 +214,9 @@ Output
 [1         3         3]
 ```
 
-### Adding scaler to a vector
+### Adding scalar to a vector
 
-Adding scaler with vector is not really standard in linear algebra, but here in Jacobi, it will perform element wise addition.
+Adding scalar with vector is not really standard in linear algebra, but here in Jacobi, it will perform element wise addition.
 
 ```cpp
 #include <iostream>
@@ -239,7 +239,7 @@ Output
 
 Works same as `operator+`, just for subtraction.
 
-One can subtract vectors, scalers and `Row` objects.
+One can subtract vectors, scalars and `Row` objects.
 
 ```cpp
 #include <iostream>
@@ -271,9 +271,9 @@ vec1 - mat.row(0): [0         0         0]
 
 The function `operator*` can act differently depending on the input.
 
-### Scaler multiplication
+### Scalar multiplication
 
-Result of scaler multiplication with a vector can be obtained by
+Result of scalar multiplication with a vector can be obtained by
 
 ```cpp
 #include <iostream>
@@ -287,7 +287,7 @@ int main(){
 
 ### Inner product
 
-Inner product of 2 vectors is defined as $x^Tx$, where $x$ is a column vector. The output is a scaler.
+Inner product of 2 vectors is defined as $x^Tx$, where $x$ is a column vector. The output is a scalar.
 
 We can find inner product by using `operator*`
 
@@ -308,7 +308,7 @@ Output
 Inner product is: 18.85
 ```
 
-Additionally one can use the method `inner_product` to calculuate inner product.
+Additionally one can use the method `inner_product` to calculate inner product.
 
 Suppose $x_1, x_2$ are 2 vectors of same shape, then $x_1^Tx_2$ can be calculated by
 
@@ -345,7 +345,7 @@ int main(){
     jacobi::Matrix A = {
             { 2.5, 3.5 },
             { 5.2, 1.2 },
-            { 2.3, 5.6, 7.8 }
+            { 2.3, 5.6 }
         };
     
     std::cout << xT * A;
@@ -355,12 +355,12 @@ int main(){
 Output
 
 ```
-[19.8      22.7         0]
+[19.8      22.7]
 ```
 
 ## `operator/`
 
-Operations such as $\frac{\mathbf{v}}{\text{Scaler}}$ and $\frac{\text{scaler}}{\mathbf{v}}$
+Operations such as $\frac{\mathbf{v}}{\text{Scalar}}$ and $\frac{\text{scalar}}{\mathbf{v}}$
 
 ```cpp
 #include <iostream>

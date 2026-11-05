@@ -28,5 +28,5 @@ Move include headers to the project
 
 ```powershell
 cd .. # Move to project root
-Copy-Item -Path .\include -Destination C:\path\to\your\project -Recurforce -Recurse
+Copy-Item -Path .\include -Destination C:\path\to\your\project -Recurse
 ```

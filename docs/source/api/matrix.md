@@ -8,7 +8,7 @@ It is the same concept used in Linear Algebra.
 
 **Shape and size of matrix cannot be changed after creating one!**
 
-Various operators are overloaded for easy of use.
+Various operators are overloaded for ease of use.
 
 ## Creating a `jacobi::Matrix`
 
@@ -177,7 +177,7 @@ Output
 [4         5         6]
 ```
 
-## Getting size and dimensions of vector
+## Getting size and dimensions of matrix
 
 For a matrix in $\mathbb{R}^{m\times n}$ `size()` method returns $m\times n$, `row()` method returns $m$ and `cols()` method returns $n$.
 
@@ -301,9 +301,9 @@ Output
 [4         6         8]
 ```
 
-### Adding scaler to a matrix
+### Adding scalar to a matrix
 
-Adding scaler to a matrix is not really defined in Linear Algebra, but here in jacobi it performs element-wise addition
+Adding scalar to a matrix is not really defined in Linear Algebra, but here in jacobi it performs element-wise addition
 
 ```cpp
 #include <iostream>
@@ -329,7 +329,7 @@ Output
 
 Works same as `operator+`, just for subtraction.
 
-One can subtract matrix and scalers.
+One can subtract matrix and scalars.
 
 ```cpp
 #include <iostream>
@@ -367,9 +367,9 @@ matA - 10:
 
 The function `operator*` can act differently depending on the input.
 
-### Scaler multiplication
+### Scalar multiplication
 
-Result of scaler multiplication with a matrix can be obtained by
+Result of scalar multiplication with a matrix can be obtained by
 
 ```cpp
 #include <iostream>
@@ -446,12 +446,12 @@ int main(){
 Output
 
 ```
-[14        26]
+[14        32]
 ```
 
 ## `operator/`
 
-Operations such as $\frac{A}{\text{Scaler}}$, $\frac{\text{scaler}}{A}$ and $\frac{A}{B}$.
+Operations such as $\frac{A}{\text{Scalar}}$, $\frac{\text{scalar}}{A}$ and $\frac{A}{B}$.
 
 In $\frac{A}{B}$ just element-wise division occurs.
 
