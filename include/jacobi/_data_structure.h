@@ -120,9 +120,9 @@ namespace jacobi {
 
         Vector<T> flatten() const;
 
-        std::uint64_t size() const { return m_Rows * m_Cols; }
-        std::uint64_t rows() const { return m_Rows; }
-        std::uint64_t cols() const { return m_Cols; }
+        [[nodiscard]] std::uint64_t size() const { return m_Rows * m_Cols; }
+        [[nodiscard]] std::uint64_t rows() const { return m_Rows; }
+        [[nodiscard]] std::uint64_t cols() const { return m_Cols; }
 
         void save(const std::string&, const std::uint8_t = 1) const;
 
@@ -408,7 +408,7 @@ jacobi::Vector<T> jacobi::Vector<T>::operator*(const Matrix<T>& i_M) const {
     if (m_Length != i_M.rows()) {
         throw std::domain_error("Attempt to multipy non-compatible vector-matrix");
     }
-    Vector r_V(m_Length);
+    Vector r_V(i_M.cols());
     for (std::uint64_t i = 0; i < i_M.cols(); ++i) {
         r_V[i] = T{};
         for (std::uint64_t j = 0; j < m_Length; ++j) {
@@ -554,6 +554,9 @@ jacobi::Matrix<T>::Matrix(std::initializer_list<std::initializer_list<T>> values
     std::uint64_t i = 0;
     for (const auto& row : values) {
         std::uint64_t j = 0;
+        if (row.size() != m_Cols) {
+            throw std::runtime_error("All rows must have same sizes");
+        }
         for (const auto& element : row) {
             m_Data[i * m_Cols + j] = element;
             ++j;
@@ -685,7 +688,7 @@ jacobi::Vector<T> jacobi::Matrix<T>::operator*(const Vector<T>& i_V) const {
     for (std::uint64_t i = 0; i < m_Rows; ++i) {
         r_V[i] = T{};
         for (std::uint64_t j = 0; j < m_Cols; ++j) {
-            r_V[i] += m_Data[j + i * m_Rows] * i_V[j];
+            r_V[i] += m_Data[j + i * m_Cols] * i_V[j];
         }
     }
     return r_V;
